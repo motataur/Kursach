@@ -3,7 +3,6 @@
         xmlns:vm="using:Kursach.ViewModels"
         x:Class="Kursach.Views.ConfirmRentWindow"
         x:DataType="vm:ConfirmRentWindowViewModel"
-        x:CompileBindings="False"
         Title="Подтверждение заселения"
         Width="420" SizeToContent="Height"
         CanResize="False"
@@ -50,12 +49,10 @@
         <Grid ColumnDefinitions="*, Auto">
             <Button Grid.Column="0" Content="Отмена"
                     Command="{Binding CancelCommand}"
-                    CommandParameter="{Binding $parent[Window]}"
-                    x:CompileBindings="False"/>
+                    CommandParameter="{Binding $parent[Window]}"/>
             <Button Grid.Column="1" Content="Подтвердить заселение"
                     Command="{Binding ConfirmCommand}"
-                    CommandParameter="{Binding $parent[Window]}"
-                    x:CompileBindings="False"/>
+                    CommandParameter="{Binding $parent[Window]}"/>
         </Grid>
     </StackPanel>
 </Window>

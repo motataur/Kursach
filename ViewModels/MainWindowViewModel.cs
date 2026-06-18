@@ -44,6 +44,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private string _roomSearchText;
     [ObservableProperty] private int _selectedRoomStatusIndex = 0;
     private int? _reservedByClientId = null;
+    
+    [ObservableProperty] private DateTimeOffset? _reportFromDate = DateTimeOffset.Now.AddMonths(-1);
+    [ObservableProperty] private DateTimeOffset? _reportToDate = DateTimeOffset.Now;
+    [ObservableProperty] private string _reportStatusMessage = string.Empty;
 
     public MainWindowViewModel(IServiceProvider serviceProvider, ClientRepository repository, 
         RoomRepository roomRepository, ReservationRepository reservationRepository, RentRepository rentRepository)
@@ -261,6 +265,69 @@ public partial class MainWindowViewModel : ViewModelBase
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             await window.ShowDialog(desktop.MainWindow);
+        }
+    }
+    [RelayCommand]
+    public async Task GenerateReportAsync()
+    {
+        ReportStatusMessage = string.Empty;
+
+        if (ReportFromDate == null || ReportToDate == null)
+        {
+            ReportStatusMessage = "❌ Укажите обе даты периода";
+            return;
+        }
+
+        if (ReportFromDate > ReportToDate)
+        {
+            ReportStatusMessage = "❌ Дата начала позже даты окончания";
+            return;
+        }
+
+        var from = ReportFromDate.Value.DateTime;
+        var to = ReportToDate.Value.DateTime;
+
+        var rows = _rentRepository.GetReportData(from, to);
+
+        if (rows.Count == 0)
+        {
+            ReportStatusMessage = "⚠️ За выбранный период заселений не найдено";
+            return;
+        }
+
+        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop
+            || desktop.MainWindow == null)
+        {
+            return;
+        }
+
+        var storageProvider = desktop.MainWindow.StorageProvider;
+        var file = await storageProvider.SaveFilePickerAsync(new Avalonia.Platform.Storage.FilePickerSaveOptions
+        {
+            Title = "Сохранить отчёт",
+            SuggestedFileName = $"Отчёт_{from:dd.MM.yyyy}_{to:dd.MM.yyyy}.pdf",
+            DefaultExtension = "pdf",
+            FileTypeChoices = new[]
+            {
+                new Avalonia.Platform.Storage.FilePickerFileType("PDF файл") { Patterns = new[] { "*.pdf" } }
+            }
+        });
+
+        if (file == null)
+        {
+            return;
+        }
+
+        try
+        {
+            var pdfBytes = ReportGenerator.GenerateRentReport(rows, from, to);
+            await using var stream = await file.OpenWriteAsync();
+            await stream.WriteAsync(pdfBytes);
+            ReportStatusMessage = "✅ Отчёт успешно сохранён";
+        }
+        catch (Exception ex)
+        {
+            ReportStatusMessage = $"❌ Ошибка при создании отчёта: {ex.Message}";
         }
     }
 }

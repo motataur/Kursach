@@ -6,6 +6,7 @@ using Kursach.Views;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using QuestPDF.Infrastructure;
 
 namespace Kursach;
 
@@ -17,6 +18,7 @@ sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        QuestPDF.Settings.License = LicenseType.Community;
         var host = Host.CreateDefaultBuilder().
             ConfigureAppConfiguration((context, config) =>
             {

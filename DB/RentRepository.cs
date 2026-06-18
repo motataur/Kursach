@@ -65,7 +65,7 @@ public class RentRepository
         string sql = @"SELECT endDate FROM rent 
                        WHERE roomNumber = @roomNumber 
                        AND endDate >= NOW() 
-                       ORDER BY endDate DESC LIMIT 0;";
+                       ORDER BY endDate DESC LIMIT 1;";
         try
         {
             using var connection = new MySqlConnection(_connectionString);
@@ -78,5 +78,45 @@ public class RentRepository
         }
         catch (Exception ex) { Console.WriteLine(ex); }
         return endDate;
+    }
+
+    public List<RentReportRow> GetReportData(DateTime from, DateTime to)
+    {
+        List<RentReportRow> data = new List<RentReportRow>();
+        string sql = @"SELECT r.roomNumber, r.startDate, r.endDate, 
+                              c.lastname, c.name AS clientName,
+                              rm.pricePerN
+                       FROM rent r
+                       LEFT JOIN client c ON r.clientId = c.id
+                       LEFT JOIN room rm ON r.roomNumber = rm.number
+                       WHERE r.startDate >= @from AND r.startDate <= @to
+                       ORDER BY r.startDate;";
+        try
+        {
+            using var connection = new MySqlConnection(_connectionString);
+            connection.Open();
+            using var mc = new MySqlCommand(sql, connection);
+            mc.Parameters.AddWithValue("@from", from.Date);
+            mc.Parameters.AddWithValue("@to", to.Date.AddDays(1).AddSeconds(-1));
+            using var dr = mc.ExecuteReader();
+            while (dr.Read())
+            {
+                var start = dr.GetDateTime("startDate");
+                var end = dr.GetDateTime("endDate");
+                var pricePerN = dr.GetInt32("pricePerN");
+                var nights = Math.Max(1, (end.Date - start.Date).Days);
+
+                data.Add(new RentReportRow
+                {
+                    RoomNumber = dr.GetInt32("roomNumber"),
+                    ClientFullName = $"{dr.GetString("lastname")} {dr.GetString("clientName")}",
+                    StartDate = start,
+                    EndDate = end,
+                    Price = pricePerN * nights
+                });
+            }
+        }
+        catch (Exception ex) { Console.WriteLine(ex); }
+        return data;
     }
 }

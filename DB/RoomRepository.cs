@@ -81,28 +81,41 @@ public class RoomRepository
             using var mc = new MySqlCommand(sql, connection);
             mc.Parameters.AddWithValue("@isFree", isFree);
             mc.Parameters.AddWithValue("@number", number);
-            int rows = mc.ExecuteNonQuery();
-            Console.WriteLine($"SetRoomFree: обновлено {rows} строк для комнаты {number}, isFree={isFree}");
+            mc.ExecuteNonQuery();
         }
-        catch (Exception ex) 
-        { 
-            Console.WriteLine($"SetRoomFree ОШИБКА: {ex.Message}");
-        }
+        catch (Exception ex) { Console.WriteLine(ex); }
     }
 
     public void FreeExpiredRooms()
     {
-        string sql = @"UPDATE room SET isFree = 1 
-                       WHERE number IN (
-                           SELECT roomNumber FROM rent 
-                           WHERE endDate < NOW()
+        string freeSql = @"UPDATE room r
+                       SET r.isFree = 1
+                       WHERE EXISTS (
+                           SELECT 1 FROM rent rt WHERE rt.roomNumber = r.number
+                       )
+                       AND NOT EXISTS (
+                           SELECT 1 FROM rent rt 
+                           WHERE rt.roomNumber = r.number 
+                           AND rt.endDate >= NOW()
+                       );";
+
+        
+        string occupySql = @"UPDATE room r
+                       SET r.isFree = 0
+                       WHERE EXISTS (
+                           SELECT 1 FROM rent rt 
+                           WHERE rt.roomNumber = r.number 
+                           AND rt.startDate <= NOW()
+                           AND rt.endDate >= NOW()
                        );";
         try
         {
             using var connection = new MySqlConnection(_connectionString);
             connection.Open();
-            using var mc = new MySqlCommand(sql, connection);
-            mc.ExecuteNonQuery();
+            using (var mc1 = new MySqlCommand(freeSql, connection))
+                mc1.ExecuteNonQuery();
+            using (var mc2 = new MySqlCommand(occupySql, connection))
+                mc2.ExecuteNonQuery();
         }
         catch (Exception ex) { Console.WriteLine(ex); }
     }
