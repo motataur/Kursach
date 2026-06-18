@@ -1,0 +1,262 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Kursach.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Kursach.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Kursach"
+        WindowState="Maximized"
+        SystemDecorations="None">
+    <SplitView>
+<SplitView.Content>
+    <TabControl Name="MainTabControl">
+        <TabControl.ItemTemplate>
+            <DataTemplate />
+        </TabControl.ItemTemplate>
+        
+        <!-- ЗАСЕЛЕНИЕ -->
+    
+        <TabItem Header="Заселение">
+    <ScrollViewer Padding="20">
+        <StackPanel Spacing="20" MaxWidth="600" HorizontalAlignment="Left">
+            <TextBlock Text="Оформление нового заселения" FontSize="20" 
+                       FontWeight="Bold" Foreground="Gray"/>
+
+            <!-- Комната -->
+            <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Padding="15">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="1. Номер комнаты" FontWeight="Bold"/>
+                    <TextBox Watermark="Введите номер комнаты..."
+                             Text="{Binding CheckInRoomNumber}"/>
+                    <TextBlock Text="{Binding RoomStatusMessage}" 
+                               IsVisible="{Binding RoomStatusMessage, 
+                                   Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Клиент -->
+            <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Padding="15">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="2. Поиск клиента" FontWeight="Bold"/>
+                    <TextBox Watermark="Введите фамилию клиента..."
+                             Text="{Binding ClientSearchText}"/>
+
+                    <ListBox ItemsSource="{Binding ClientSuggestions}"
+                             SelectedItem="{Binding SelectedClient}"
+                             MaxHeight="150"
+                             IsVisible="{Binding ClientSuggestions.Count, 
+                                 Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding LastName}"/>
+                                    <Run Text=" "/>
+                                    <Run Text="{Binding Name}"/>
+                                    <Run Text=" — ****"/>
+                                    <Run Text="{Binding Phone, 
+                                        Converter={StaticResource LastFourDigitsConverter}}"/>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <TextBlock IsVisible="{Binding SelectedClient, 
+                                   Converter={x:Static ObjectConverters.IsNotNull}}"
+                               Foreground="Green">
+                        <Run Text="Выбран: "/>
+                        <Run Text="{Binding SelectedClient.LastName}"/>
+                        <Run Text=" "/>
+                        <Run Text="{Binding SelectedClient.Name}"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <Button Content="Оформить заселение и выдать ключ"
+                    HorizontalAlignment="Right"
+                    Height="40"
+                    IsEnabled="{Binding IsRoomAvailable}"
+                    Command="{Binding OpenConfirmRentWindowAsync}"/>
+        </StackPanel>
+    </ScrollViewer>
+</TabItem>
+        <!--КЛИЕНТЫ-->
+        <TabItem Header="Клиенты">
+    <Grid RowDefinitions="Auto, *" Margin="20">
+
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto, Auto" RowDefinitions="Auto, Auto" Margin="0,0,0,15">
+            
+            <TextBox Grid.Row="0" Grid.Column="0" 
+                     PlaceholderText="Поиск клиента по ФИО или телефону..." 
+                     Name="SearchClientTextBox"
+                     Text="{Binding SearchText, Mode=TwoWay}"/>
+    
+            <ComboBox Grid.Row="0" Grid.Column="1" Margin="10,0" Width="150" 
+                      PlaceholderText="Сортировка" 
+                      SelectedIndex="{Binding SelectedSortIndex, Mode=TwoWay}">
+                <ComboBoxItem Content="По алфавиту (А-Я)"/>
+                <ComboBoxItem Content="По алфавиту (Я-А)"/>
+                <ComboBoxItem Content="Сначала новые"/>
+            </ComboBox>
+    
+            <Button Grid.Row="0" Grid.Column="2"
+                    Content="Добавить" 
+                    Width="85" 
+                    Margin="0,10,0,0"
+                    Command="{Binding OpenAddClientWindowAsync}"/>
+        </Grid>
+
+        <Border Grid.Row="1" 
+                BorderBrush="#DCDFE6" 
+                BorderThickness="1" 
+                CornerRadius="6" 
+                ClipToBounds="True">
+
+            <DataGrid ItemsSource="{Binding FilteredClients}" 
+                      AutoGenerateColumns="False" 
+                      IsReadOnly="True" 
+                      GridLinesVisibility="All"
+                      Background="#292929"
+                      RowBackground="#292929" 
+                      HeadersVisibility="All"
+                      VerticalScrollBarVisibility="Auto">
+
+                <DataGrid.Styles>
+                    <Style Selector="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#292929"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="Padding" Value="10,8"/>
+                        <Setter Property="BorderBrush" Value="#292929"/>
+                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                    </Style>
+                    <Style Selector="DataGridCell">
+                        <Setter Property="Padding" Value="10,8"/>
+                    </Style>
+                </DataGrid.Styles>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Фамилия" Binding="{Binding LastName}" Width="*"/>
+                    <DataGridTextColumn Header="Имя" Binding="{Binding Name}" Width="*"/>
+                    <DataGridTextColumn Header="Телефон" Binding="{Binding Phone}" Width="*"/>
+                    <DataGridTextColumn Header="Серия" Binding="{Binding PassportSeries}" Width="Auto"/>
+                    <DataGridTextColumn Header="Номер" Binding="{Binding PassportNumber}" Width="Auto"/>
+                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</TabItem>
+
+        <!--КОМНАТЫ -->
+        <TabItem Header="Комнаты">
+            <Grid RowDefinitions="Auto, *" Margin="20">
+                <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Margin="0,0,0,15">
+                    <TextBox Grid.Column="0"
+                             Watermark="Поиск комнат (номер, тип)..."
+                             Text="{Binding RoomSearchText}"/>
+                    <ComboBox Grid.Column="1" Margin="10,0" Width="150"
+                              SelectedIndex="{Binding SelectedRoomStatusIndex}">
+                        <ComboBoxItem Content="Все"/>
+                        <ComboBoxItem Content="Свободные"/>
+                        <ComboBoxItem Content="Занятые"/>
+                        <ComboBoxItem Content="Забронированные"/>
+                    </ComboBox>
+                </Grid>
+
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding FilteredRooms}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          GridLinesVisibility="All">
+                    <!-- стили те же что у клиентов -->
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Номер"     Binding="{Binding Number}"    Width="Auto"/>
+                        <DataGridTextColumn Header="Тип"       Binding="{Binding Name}"      Width="*"/>
+                        <DataGridTextColumn Header="Площадь"   Binding="{Binding Area}"      Width="Auto"/>
+                        <DataGridTextColumn Header="Цена/ночь" Binding="{Binding PricePerN}" Width="Auto"/>
+                        <DataGridTextColumn Header="Свободна"  Binding="{Binding IsFree}"    Width="Auto"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </TabItem>
+
+        <!--БРОНИРОВАНИЯ -->
+        <TabItem Header="Бронирования">
+    <Grid RowDefinitions="Auto, *" Margin="20">
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto, Auto" Margin="0,0,0,15">
+            <TextBox Grid.Column="0"
+                     PlaceholderText="Поиск брони по номеру комнаты или фамилии..."
+                     Text="{Binding ReservationSearchText}"/>
+            <Button Grid.Column="2"
+                    Content="Добавить бронь"
+                    Width="130"
+                    Margin="10,0,0,0"
+                    Command="{Binding OpenAddReservationWindowAsync}"/>
+        </Grid>
+
+        <Border Grid.Row="1"
+                BorderBrush="#DCDFE6"
+                BorderThickness="1"
+                CornerRadius="6"
+                ClipToBounds="True">
+
+            <DataGrid ItemsSource="{Binding FilteredReservations}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      GridLinesVisibility="All"
+                      Background="#292929"
+                      RowBackground="#292929"
+                      HeadersVisibility="All"
+                      VerticalScrollBarVisibility="Auto">
+
+                <DataGrid.Styles>
+                    <Style Selector="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#292929"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="Padding" Value="10,8"/>
+                        <Setter Property="BorderBrush" Value="#292929"/>
+                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                    </Style>
+                    <Style Selector="DataGridCell">
+                        <Setter Property="Padding" Value="10,8"/>
+                    </Style>
+                </DataGrid.Styles>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Комната"      Binding="{Binding RoomNumber}"      Width="Auto"/>
+                    <DataGridTextColumn Header="Клиент"       Binding="{Binding ClientLastName}"  Width="*"/>
+                    <DataGridTextColumn Header="Дата брони"   Binding="{Binding ReservationDate}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</TabItem>
+
+        <!-- ОТЧЕТЫ-->
+        <TabItem Header="Отчёт">
+            <ScrollViewer Padding="20">
+                <StackPanel Spacing="20" MaxWidth="500" HorizontalAlignment="Left">
+                    <TextBlock Text="Отчет о работе отеля" FontSize="20" FontWeight="Bold"/>
+                    
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Выберите период для генерации отчета:"/>
+                        <Grid ColumnDefinitions="*, *, *,*">
+                            <DatePicker Grid.Column="0" Margin="0,0,5,0"/>
+                            <DatePicker Grid.Column="3" Margin="150,0,0,0"/>
+                        </Grid>
+                    </StackPanel>
+                    
+                    <!-- Кнопка экспорта -->
+                    <Button Content="Экспортировать отчет в PDF" Width="250" Height="45" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                </StackPanel>
+            </ScrollViewer>
+        </TabItem>
+        
+    </TabControl>
+</SplitView.Content>
+</SplitView>
+</Window>

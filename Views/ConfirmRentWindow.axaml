@@ -1,0 +1,61 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Kursach.ViewModels"
+        x:Class="Kursach.Views.ConfirmRentWindow"
+        x:DataType="vm:ConfirmRentWindowViewModel"
+        x:CompileBindings="False"
+        Title="Подтверждение заселения"
+        Width="420" SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen">
+
+    <StackPanel Margin="25" Spacing="14">
+        <TextBlock Text="Подтверждение заселения" FontSize="18" FontWeight="Bold"/>
+
+        <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Padding="12">
+            <StackPanel Spacing="6">
+                <TextBlock Text="Клиент" FontWeight="SemiBold" Foreground="Gray"/>
+                <TextBlock Text="{Binding ClientInfo}"/>
+                <TextBlock Text="{Binding Phone}"/>
+            </StackPanel>
+        </Border>
+
+        <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Padding="12">
+            <StackPanel Spacing="6">
+                <TextBlock Text="Комната" FontWeight="SemiBold" Foreground="Gray"/>
+                <TextBlock Text="{Binding RoomInfo}"/>
+            </StackPanel>
+        </Border>
+
+        <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Padding="12">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Дата заселения" FontWeight="SemiBold" Foreground="Gray"/>
+                <DatePicker SelectedDate="{Binding StartDate}"/>
+            </StackPanel>
+        </Border>
+
+        <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Padding="12">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Дата выселения" FontWeight="SemiBold" Foreground="Gray"/>
+                <DatePicker SelectedDate="{Binding EndDate}"/>
+            </StackPanel>
+        </Border>
+
+        <TextBlock FontSize="16" FontWeight="Bold">
+            <Run Text="К оплате: "/>
+            <Run Text="{Binding TotalPrice}"/>
+            <Run Text=" ₽"/>
+        </TextBlock>
+
+        <Grid ColumnDefinitions="*, Auto">
+            <Button Grid.Column="0" Content="Отмена"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    x:CompileBindings="False"/>
+            <Button Grid.Column="1" Content="Подтвердить заселение"
+                    Command="{Binding ConfirmCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    x:CompileBindings="False"/>
+        </Grid>
+    </StackPanel>
+</Window>

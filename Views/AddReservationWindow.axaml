@@ -1,0 +1,74 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Kursach.ViewModels"
+        x:Class="Kursach.Views.AddReservationWindow"
+        x:DataType="vm:AddReservationWindowViewModel"
+        Title="Новое бронирование"
+        Width="420" SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen">
+
+    <StackPanel Margin="25" Spacing="14">
+        <TextBlock Text="Новое бронирование" FontSize="18" FontWeight="Bold"/>
+
+        <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Padding="12">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Номер комнаты" FontWeight="SemiBold" Foreground="Gray"/>
+                <TextBox PlaceholderText="Введите номер комнаты..."
+                         Text="{Binding RoomNumber}"/>
+                <TextBlock Text="{Binding RoomStatusMessage}"
+                           IsVisible="{Binding RoomStatusMessage,
+                               Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+            </StackPanel>
+        </Border>
+
+        <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Padding="12">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Поиск клиента" FontWeight="SemiBold" Foreground="Gray"/>
+                <TextBox PlaceholderText="Введите фамилию..."
+                         Text="{Binding ClientSearchText}"/>
+                <ListBox ItemsSource="{Binding ClientSuggestions}"
+                         SelectedItem="{Binding SelectedClient}"
+                         MaxHeight="150"
+                         IsVisible="{Binding ClientSuggestions.Count,
+                             Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <Run Text="{Binding LastName}"/>
+                                <Run Text=" "/>
+                                <Run Text="{Binding Name}"/>
+                                <Run Text=" — ****"/>
+                                <Run Text="{Binding Phone, Converter={StaticResource LastFourDigitsConverter}}"/>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <TextBlock Foreground="Green"
+                           IsVisible="{Binding SelectedClient,
+                               Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <Run Text="Выбран: "/>
+                    <Run Text="{Binding SelectedClient.LastName}"/>
+                    <Run Text=" "/>
+                    <Run Text="{Binding SelectedClient.Name}"/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <Border BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" Padding="12">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Дата бронирования" FontWeight="SemiBold" Foreground="Gray"/>
+                <DatePicker SelectedDate="{Binding ReservationDate}"/>
+            </StackPanel>
+        </Border>
+
+        <Grid ColumnDefinitions="*, Auto">
+            <Button Grid.Column="0" Content="Отмена"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding $parent[Window]}"/>
+            <Button Grid.Column="1" Content="Забронировать"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding $parent[Window]}"/>
+        </Grid>
+    </StackPanel>
+</Window>

@@ -1,0 +1,98 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels1="clr-namespace:Kursach.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Kursach.Views.AddClientWindow"
+        x:DataType="viewModels1:AddClientWindowViewModel"
+        x:Name="thisWindow"
+        Title="AddClientWindow"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Height="500"
+        Width="500">
+    <Grid RowDefinitions="*, Auto" Margin="20">
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="15">
+                
+                <TextBlock Text="Регистрация" 
+                           FontSize="18" 
+                           FontWeight="Bold" 
+                           Margin="0,0,0,10"/>
+
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Фамилия:" FontWeight="SemiBold"/>
+                    <TextBox x:Name="LastNameTextBox" 
+                             Text="{Binding LastName}" 
+                             PlaceholderText="Введите фамилию" />
+                </StackPanel>
+
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Имя:" FontWeight="SemiBold"/>
+                    <TextBox x:Name="FirstNameTextBox" 
+                             Text="{Binding FirstName}" 
+                             PlaceholderText="Введите имя"/>
+                </StackPanel>
+
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Электронная почта:" FontWeight="SemiBold"/>
+                    <TextBox x:Name="EmailTextBox" 
+                             Text="{Binding Email}" 
+                             PlaceholderText="example@mail.com"/>
+                </StackPanel>
+
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Номер телефона:" FontWeight="SemiBold"/>
+                    <TextBox x:Name="PhoneTextBox" 
+                             Text="{Binding Phone}" 
+                             PlaceholderText="+7 (999) 000-00-00" 
+                             MaxLength="11"/>
+                </StackPanel>
+
+                <Grid ColumnDefinitions="*, *" Margin="0,5,0,0">
+                    <StackPanel Grid.Column="0" Spacing="5" Margin="0,0,10,0">
+                        <TextBlock Text="Серия паспорта:" FontWeight="SemiBold"/>
+                        <TextBox x:Name="PassportSeriesTextBox" 
+                                 Text="{Binding PassportSeries}" 
+                                 PlaceholderText="00 00" 
+                                 MaxLength="4"/>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="1" Spacing="5">
+                        <TextBlock Text="Номер паспорта:" FontWeight="SemiBold"/>
+                        <TextBox x:Name="PassportNumberTextBox" 
+                                 Text="{Binding PassportNumber}" 
+                                 PlaceholderText="000000" 
+                                 MaxLength="6"/>
+                    </StackPanel>
+                </Grid>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*, *" Margin="0,20,0,0">
+            <Button Grid.Column="0" 
+                    Content="Сохранить"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    HorizontalAlignment="Stretch" 
+                    HorizontalContentAlignment="Center"
+                    Background="#2ECC71" 
+                    Foreground="White"
+                    Height="35"
+                    Margin="0,0,10,0"/>
+            
+            <Button Grid.Column="1" 
+                    Content="Отмена" 
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    x:CompileBindings="False"
+                    HorizontalAlignment="Stretch" 
+                    HorizontalContentAlignment="Center"
+                    Background="#E74C3C" 
+                    Foreground="White"
+                    Height="35"/>
+        </Grid>
+    </Grid>
+</Window>
