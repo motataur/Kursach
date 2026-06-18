@@ -58,17 +58,9 @@ public partial class ConfirmRentWindowViewModel : ViewModelBase
             EndDate = EndDate.DateTime
         };
 
-        Console.WriteLine($"Добавляем аренду: комната {rent.RoomNumber}, клиент {rent.ClientId}");
         _rentRepository.AddRent(rent);
-    
-        Console.WriteLine($"Меняем статус комнаты {Room.Number} на занятую (false/0)");
         _roomRepository.SetRoomFree(Room.Number, false);
-    
-        Console.WriteLine($"Удаляем бронь для комнаты {Room.Number}");
         _reservationRepository.DeleteReservationByRoom(Room.Number);
-        Console.WriteLine($"Вызываем SetRoomFree для комнаты {Room.Number}");
-        _roomRepository.SetRoomFree(Room.Number, false);
-    
         _onSuccess?.Invoke();
 
         if (parameter is Window window)
