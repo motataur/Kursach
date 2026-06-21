@@ -1,5 +1,5 @@
 ﻿{
   "DBConnection": {
-    "ConnectionString" : "server=localhost;database=1125_stolbov_kurs;user=root;password=root;"
+    "ConnectionString" : "server=192.168.200.13;database=1125_stolbov_kurs;user=student;password=student;"
   }
 }
